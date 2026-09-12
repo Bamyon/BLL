@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MTS 201 Is Live — BLL Lab Notes</title>
+<meta name="description" content="The first full course guide on BLL is here — 10 chapters, beginner-first, built exactly the way we promised.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231B2A5B'/%3E%3Ctext x='50' y='69' font-family='Georgia,serif' font-size='58' font-weight='700' fill='white' text-anchor='middle'%3EB%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600;0,7..72,700;1,7..72,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --bg:#F7F8FB; --bg-alt:#EEF1FA; --bg-warm:#FFF6E6;
+    --navy:#1B2A5B; --navy-deep:#131F45;
+    --orange:#F5A623; --orange-deep:#DB8F13;
+    --ink:#1F2430; --ink-soft:#4B5163; --ink-faint:#7A8098;
+    --white:#FFFFFF; --border:#E2E6F2; --danger:#C0392B; --success:#2E9E5B;
+    --font-serif:'Literata',Georgia,serif; --font-sans:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    --max-w:1180px; --radius-s:10px; --radius-m:16px; --radius-l:28px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion:reduce){ *{animation-duration:.001ms!important;transition-duration:.001ms!important;} }
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:var(--font-serif);font-weight:600;line-height:1.15;margin:0 0 .5em 0;color:var(--navy-deep);}
+  p{margin:0 0 1em 0;color:var(--ink-soft);}
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:var(--max-w);margin:0 auto;padding:0 24px;}
+  .skip-link{position:absolute;left:-999px;top:0;background:var(--navy);color:#fff;padding:12px 18px;border-radius:0 0 8px 0;z-index:999;}
+  .skip-link:focus{left:0;}
+  a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--orange);outline-offset:2px;}
+  section{padding:72px 0;}
+  @media (max-width:720px){ section{padding:48px 0;} }
+  .btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-sans);font-weight:600;font-size:.98rem;padding:14px 26px;border-radius:999px;border:2px solid transparent;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease;}
+  .btn:hover{transform:translateY(-1px);}
+  .btn-primary{background:var(--orange);color:var(--navy-deep);}
+  .btn-primary:hover{background:var(--orange-deep);}
+  .btn-ghost{background:transparent;color:var(--navy);border-color:var(--border);}
+  .btn-ghost:hover{border-color:var(--navy);}
+  .btn-navy{background:var(--navy);color:#fff;}
+  .btn-navy:hover{background:var(--navy-deep);}
+  .btn-danger{background:#FBEAE8;color:var(--danger);}
+  .btn-danger:hover{background:#F6D5D1;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+  input,textarea,select{font-family:var(--font-sans);font-size:.95rem;}
+  .field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;text-align:left;}
+  .field label{font-size:.85rem;font-weight:600;color:var(--navy-deep);}
+  .field input,.field textarea{padding:12px 16px;border-radius:10px;border:1px solid var(--border);background:#fff;}
+  .field textarea{resize:vertical;min-height:90px;}
+  .form-msg{font-size:.88rem;min-height:1.2em;margin-top:6px;}
+  .form-msg.ok{color:var(--success);}
+  .form-msg.err{color:var(--danger);}
+  .card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-m);padding:24px;}
+
+  /* ---- Header / Nav ---- */
+  header.site-header{position:sticky;top:0;z-index:200;background:rgba(247,248,251,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);}
+  .nav-row{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;max-width:var(--max-w);margin:0 auto;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand svg{width:38px;height:38px;display:block;flex-shrink:0;}
+  .brand-text{font-family:var(--font-serif);font-weight:700;font-size:1.25rem;color:var(--navy-deep);}
+  .brand-text span{color:var(--orange-deep);}
+  nav.main-links{display:flex;align-items:center;gap:28px;}
+  nav.main-links a{font-size:.96rem;font-weight:500;color:var(--ink-soft);padding:6px 2px;border-bottom:2px solid transparent;transition:color .15s ease,border-color .15s ease;}
+  nav.main-links a:hover,nav.main-links a.active{color:var(--navy-deep);border-color:var(--orange);}
+  .nav-actions{display:flex;align-items:center;gap:12px;}
+  .subscribe-toggle{font-family:var(--font-sans);font-weight:600;font-size:.9rem;background:var(--navy);color:#fff;border:none;border-radius:999px;padding:10px 18px;cursor:pointer;}
+  .subscribe-toggle:hover{background:var(--navy-deep);}
+  .nav-account-link{font-size:.9rem;font-weight:600;color:var(--navy);border:1px solid var(--border);padding:9px 16px;border-radius:999px;}
+  .nav-account-link:hover{border-color:var(--navy);}
+  .hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px;}
+  .hamburger span{width:24px;height:2px;background:var(--navy-deep);display:block;}
+  .subscribe-drawer{max-height:0;overflow:hidden;background:var(--navy);transition:max-height .35s ease;}
+  .subscribe-drawer.open{max-height:140px;}
+  .subscribe-inner{max-width:var(--max-w);margin:0 auto;padding:20px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+  .subscribe-inner p{color:#C9D1EC;margin:0;font-size:.94rem;min-width:220px;}
+  .subscribe-inner form{display:flex;gap:10px;flex:1;min-width:260px;}
+  .subscribe-inner input[type=email]{flex:1;padding:12px 16px;border-radius:999px;border:none;font-size:.95rem;}
+  .subscribe-close{background:none;border:none;color:#C9D1EC;cursor:pointer;font-size:1.3rem;line-height:1;padding:4px 8px;}
+  .subscribe-msg{width:100%;font-size:.88rem;color:var(--orange);margin-top:8px;min-height:1em;}
+  @media (max-width:900px){
+    nav.main-links{position:fixed;inset:64px 0 auto 0;background:var(--white);flex-direction:column;align-items:flex-start;gap:0;padding:10px 24px 20px;border-bottom:1px solid var(--border);transform:translateY(-120%);transition:transform .25s ease;}
+    nav.main-links.open{transform:translateY(0);}
+    nav.main-links a{width:100%;padding:12px 0;border-bottom:1px solid var(--border);}
+    .hamburger{display:flex;}
+  }
+
+  /* ---- Page header block (used on interior pages) ---- */
+  .page-hero{padding:64px 0 20px;}
+  .page-hero h1{font-size:clamp(1.9rem,4vw,2.8rem);}
+  .page-hero p.lede{font-size:1.08rem;max-width:60ch;}
+
+  /* ---- Footer ---- */
+  footer{background:var(--navy-deep);color:#C9D1EC;padding:64px 0 32px;margin-top:40px;}
+  .footer-grid{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:40px;margin-bottom:48px;}
+  .footer-brand .brand-text{color:#fff;}
+  .footer-brand p{color:#9AA5CC;font-size:.9rem;max-width:32ch;margin-top:14px;}
+  footer h4{color:#fff;font-size:.95rem;margin-bottom:16px;font-weight:600;}
+  footer ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;}
+  footer ul a{color:#B0B9DC;font-size:.9rem;}
+  footer ul a:hover{color:#fff;}
+  .socials{display:flex;gap:12px;margin-top:4px;}
+  .socials a{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;}
+  .socials a:hover{background:var(--orange);}
+  .socials svg{width:17px;height:17px;}
+  .footer-bottom{border-top:1px solid rgba(255,255,255,.1);padding-top:24px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:.82rem;color:#8892B8;}
+  @media (max-width:900px){ .footer-grid{grid-template-columns:1fr 1fr;} }
+  @media (max-width:560px){ .footer-grid{grid-template-columns:1fr;} }
+
+
+  .post-wrap{max-width:720px;margin:0 auto;padding:0 24px;}
+  .post-meta{font-size:.85rem;color:var(--ink-faint);margin-bottom:8px;}
+  .post-body p{font-size:1.02rem;}
+
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<header class="site-header">
+  <div class="nav-row">
+    <a href="index.html" class="brand" aria-label="BLL home">
+      <svg viewBox="0 0 1240 1240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="10" y="10" width="1220" height="1220" rx="220" ry="220" fill="#1B2A5B"/>
+        <path d="M 330 330 L 330 910 L 640 910 Q 800 910 800 770 Q 800 660 700 630 Q 780 600 780 500 Q 780 330 610 330 Z M 470 460 L 590 460 Q 650 460 650 520 Q 650 580 590 580 L 470 580 Z M 470 700 L 620 700 Q 680 700 680 760 Q 680 820 620 820 L 470 820 Z" fill="#FFFFFF" fill-rule="evenodd"/>
+        <g transform="translate(845,345)">
+          <rect x="-20" y="-95" width="40" height="55" rx="8" fill="#F5A623"/>
+          <rect x="-34" y="-110" width="68" height="22" rx="8" fill="#F5A623"/>
+          <path d="M -20 -42 L -20 -30 L -62 55 Q -72 82 -44 82 L 44 82 Q 72 82 62 55 L 20 -30 L 20 -42 Z" fill="#F5A623"/>
+          <circle cx="0" cy="35" r="12" fill="#1B2A5B" opacity="0.35"/>
+        </g>
+      </svg>
+      <span class="brand-text">BLL <span>Lab</span></span>
+    </a>
+    <nav class="main-links" id="mainNav">
+      <a href="index.html" class="">Home</a>
+      <a href="explore.html" class="">Explore Courses</a>
+      <a href="lab-notes.html" class="active">Lab Notes</a>
+      <a href="index.html#facts" class="">Facts</a>
+      <a href="marketplace.html" class="">Marketplace</a>
+      <a href="about.html" class="">About</a>
+    </nav>
+    <div class="nav-actions">
+      <a href="login.html" class="nav-account-link" id="navAccountLink">Sign In</a>
+      <button class="subscribe-toggle" id="subscribeToggle" aria-expanded="false" aria-controls="subscribeDrawer">Subscribe</button>
+      <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu" aria-expanded="false" aria-controls="mainNav">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <div class="subscribe-drawer" id="subscribeDrawer">
+    <div class="subscribe-inner">
+      <p>Get an email when a new chapter or course drops. No account needed, ever.</p>
+      <form id="navSubscribeForm">
+        <input type="email" name="email" placeholder="you@example.com" required aria-label="Email address">
+        <button type="submit" class="btn btn-primary">Join</button>
+      </form>
+      <button class="subscribe-close" id="subscribeClose" aria-label="Close">×</button>
+      <div class="subscribe-msg" id="navSubscribeMsg" role="status"></div>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+<section class="page-hero" style="padding-bottom:0;">
+  <div class="post-wrap">
+    <div class="post-meta">Launch · 3 min read</div>
+    <h1>MTS 201 Is Live: Mathematical Methods I</h1>
+  </div>
+</section>
+
+<section class="post-body" style="padding-top:24px;">
+  <div class="post-wrap">
+    <p>The first full course guide on BLL is officially live — <strong>MTS 201: Mathematical Methods I</strong>, rebuilt from the ground up the way we promised: plain words before symbols, nothing skipped, and a worked example behind every formula.</p>
+
+    <p>Ten chapters, starting with the basics of what a function even is, and building all the way up to Taylor's and Maclaurin's Series — the exact material that trips students up right before exams, broken down so a total beginner can follow it start to finish.</p>
+
+    <p>Every chapter ends with a short video for anyone who wants the idea explained out loud, too. No account needed to read any of it.</p>
+
+    <p><a href="mts201.html" class="btn btn-primary" style="margin-top:12px;">Start MTS 201</a></p>
+
+    
+<div style="display:flex;align-items:center;gap:14px;margin:36px 0;padding:18px 22px;background:var(--bg-alt);border-radius:var(--radius-m);">
+  <button id="likeBtn" class="btn btn-ghost" style="background:#fff;">
+    <svg id="likeIcon" viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M12 20s-7-4.35-9.5-8.5C.5 8 2 4.5 5.5 4.5c2 0 3.5 1.2 4.5 2.8C11 5.7 12.5 4.5 14.5 4.5 18 4.5 19.5 8 19.5 11.5 17 15.65 12 20 12 20z" stroke="#1B2A5B" stroke-width="1.8"/></svg>
+    <span id="likeLabel">Like</span>
+  </button>
+  <span id="likeCount" style="font-size:.9rem;color:var(--ink-faint);">0 people found this useful</span>
+</div>
+
+<h2 style="font-size:1.4rem;margin-top:48px;">Comments</h2>
+<p style="font-size:.9rem;">Your email is only used for moderation — it's never shown publicly. Only your name appears.</p>
+
+<form id="commentForm" class="card" style="margin-top:16px;">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+    <div class="field">
+      <label for="cName">Name</label>
+      <input type="text" id="cName" required placeholder="Your name">
+    </div>
+    <div class="field">
+      <label for="cEmail">Email (not shown publicly)</label>
+      <input type="email" id="cEmail" required placeholder="you@example.com">
+    </div>
+  </div>
+  <div class="field">
+    <label for="cText">Comment</label>
+    <textarea id="cText" required placeholder="Share a thought..."></textarea>
+  </div>
+  <button type="submit" class="btn btn-primary">Post Comment</button>
+  <div class="form-msg" id="commentMsg"></div>
+</form>
+
+<div id="commentList" style="margin-top:28px;display:flex;flex-direction:column;gap:16px;"></div>
+
+<script>
+  const PAGE_ID = "blog-mts201-is-live";
+
+  async function initEngagement(){
+    if (!(window.BLL && window.BLL.getLikeState)) { setTimeout(initEngagement, 300); return; }
+
+    const likeBtn = document.getElementById('likeBtn');
+    const likeLabel = document.getElementById('likeLabel');
+    const likeCount = document.getElementById('likeCount');
+
+    function renderLike(state){
+      likeLabel.textContent = state.liked ? 'Liked' : 'Like';
+      likeBtn.style.color = state.liked ? '#DB8F13' : '';
+      likeCount.textContent = state.count + (state.count === 1 ? ' person found this useful' : ' people found this useful');
+    }
+
+    const initial = await window.BLL.getLikeState(PAGE_ID);
+    renderLike(initial);
+
+    likeBtn.addEventListener('click', async () => {
+      likeBtn.disabled = true;
+      const result = await window.BLL.toggleLike(PAGE_ID);
+      renderLike(result);
+      likeBtn.disabled = false;
+    });
+
+    // Comments
+    const commentForm = document.getElementById('commentForm');
+    const commentMsg = document.getElementById('commentMsg');
+    const commentList = document.getElementById('commentList');
+
+    window.BLL.watchComments(PAGE_ID, (comments) => {
+      if (comments.length === 0){
+        commentList.innerHTML = '<p style="font-size:.9rem;color:var(--ink-faint);">Be the first to comment.</p>';
+        return;
+      }
+      commentList.innerHTML = comments.map(c => `
+        <div class="card" style="padding:16px 20px;">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;">
+            <strong style="font-size:.95rem;color:var(--navy-deep);">${escapeHtml(c.name)}</strong>
+            <span style="font-size:.78rem;color:var(--ink-faint);">${c.timestamp ? new Date(c.timestamp.toDate()).toLocaleDateString() : 'just now'}</span>
+          </div>
+          <p style="margin:8px 0 0;font-size:.92rem;">${escapeHtml(c.text)}</p>
+        </div>
+      `).join('');
+    });
+
+    commentForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      commentMsg.textContent = 'Posting...';
+      commentMsg.className = 'form-msg';
+      const name = document.getElementById('cName').value;
+      const email = document.getElementById('cEmail').value;
+      const text = document.getElementById('cText').value;
+      const result = await window.BLL.addComment(PAGE_ID, name, email, text);
+      commentMsg.textContent = result.message;
+      commentMsg.className = 'form-msg ' + (result.ok ? 'ok' : 'err');
+      if (result.ok) commentForm.reset();
+    });
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+  }
+
+  initEngagement();
+</script>
+
+  </div>
+</section>
+
+</main>
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="brand" style="align-items:center;">
+          <svg viewBox="0 0 1240 1240" xmlns="http://www.w3.org/2000/svg" width="36" height="36" aria-hidden="true">
+            <rect x="10" y="10" width="1220" height="1220" rx="220" ry="220" fill="#1B2A5B"/>
+            <path d="M 330 330 L 330 910 L 640 910 Q 800 910 800 770 Q 800 660 700 630 Q 780 600 780 500 Q 780 330 610 330 Z M 470 460 L 590 460 Q 650 460 650 520 Q 650 580 590 580 L 470 580 Z M 470 700 L 620 700 Q 680 700 680 760 Q 680 820 620 820 L 470 820 Z" fill="#FFFFFF" fill-rule="evenodd"/>
+            <g transform="translate(845,345)">
+              <rect x="-20" y="-95" width="40" height="55" rx="8" fill="#F5A623"/>
+              <rect x="-34" y="-110" width="68" height="22" rx="8" fill="#F5A623"/>
+              <path d="M -20 -42 L -20 -30 L -62 55 Q -72 82 -44 82 L 44 82 Q 72 82 62 55 L 20 -30 L 20 -42 Z" fill="#F5A623"/>
+              <circle cx="0" cy="35" r="12" fill="#1B2A5B" opacity="0.35"/>
+            </g>
+          </svg>
+          <div class="brand-text">BLL</div>
+        </div>
+        <p>Bamyon Learning Lab — free, beginner-first course guides for students who want to actually understand what they're studying.</p>
+        <div class="socials" style="margin-top:18px;">
+          <a href="#" aria-label="X (Twitter)"><svg viewBox="0 0 24 24" fill="none"><path d="M4 4l16 16M20 4L4 20" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></a>
+          <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="5" stroke="#fff" stroke-width="1.8"/><circle cx="12" cy="12" r="3.4" stroke="#fff" stroke-width="1.8"/><circle cx="16.6" cy="7.4" r="1" fill="#fff"/></svg></a>
+          <a href="#" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4a8 8 0 00-6.9 12l-1 4 4.1-1A8 8 0 1012 4z" stroke="#fff" stroke-width="1.8"/><path d="M9 9.5c.3 2.3 2.2 4.2 4.5 4.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></a>
+          <a href="#" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="4" stroke="#fff" stroke-width="1.8"/><path d="M10.5 9.5l5 2.5-5 2.5z" fill="#fff"/></svg></a>
+        </div>
+      </div>
+      <div>
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="explore.html">All Courses</a></li>
+          <li><a href="mts201.html">MTS 201</a></li>
+          <li><a href="lab-notes.html">Lab Notes</a></li>
+          <li><a href="index.html#facts">Facts</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul>
+          <li><a href="about.html">About BLL</a></li>
+          <li><a href="marketplace.html">Marketplace</a></li>
+          <li><a href="index.html#subscribe">Subscribe</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Account</h4>
+        <ul>
+          <li><a href="login.html">Sign In</a></li>
+          <li><a href="signup.html">Create Account</a></li>
+          <li><a href="dashboard.html">Dashboard</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> Bamyon. All rights reserved.</span>
+      <span>Teach It Yourself. Trust Yourself.</span>
+    </div>
+  </div>
+</footer>
+
+<script type="module" src="js/firebase-init.js"></script>
+<script>
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+  const mainNav = document.getElementById('mainNav');
+  hamburgerBtn.addEventListener('click', () => {
+    const isOpen = mainNav.classList.toggle('open');
+    hamburgerBtn.setAttribute('aria-expanded', isOpen);
+  });
+  const subscribeToggle = document.getElementById('subscribeToggle');
+  const subscribeDrawer = document.getElementById('subscribeDrawer');
+  const subscribeClose = document.getElementById('subscribeClose');
+  function toggleDrawer(force){
+    const willOpen = typeof force === 'boolean' ? force : !subscribeDrawer.classList.contains('open');
+    subscribeDrawer.classList.toggle('open', willOpen);
+    subscribeToggle.setAttribute('aria-expanded', willOpen);
+  }
+  subscribeToggle.addEventListener('click', () => toggleDrawer());
+  subscribeClose.addEventListener('click', () => toggleDrawer(false));
+  async function handleSubscribe(formEl, msgEl){
+    formEl.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = formEl.querySelector('input[type="email"]').value.trim();
+      msgEl.textContent = 'Joining...';
+      if (window.BLL && window.BLL.subscribeEmail){
+        const result = await window.BLL.subscribeEmail(email);
+        msgEl.textContent = result.message;
+        if (result.ok) formEl.reset();
+      } else {
+        msgEl.textContent = "You're in! (Demo mode)";
+        formEl.reset();
+      }
+    });
+  }
+  handleSubscribe(document.getElementById('navSubscribeForm'), document.getElementById('navSubscribeMsg'));
+
+  // Reflect sign-in state in the nav "Sign In" link
+  function reflectAccountLink(){
+    if (window.BLL && window.BLL.onAuthChange){
+      window.BLL.onAuthChange((user) => {
+        const link = document.getElementById('navAccountLink');
+        if (!link) return;
+        if (user){
+          link.textContent = 'Dashboard';
+          link.href = 'dashboard.html';
+        } else {
+          link.textContent = 'Sign In';
+          link.href = 'login.html';
+        }
+      });
+    } else {
+      setTimeout(reflectAccountLink, 300);
+    }
+  }
+  reflectAccountLink();
+
+
+</script>
+</body>
+</html>
