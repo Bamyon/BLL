@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Saga — BLL Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Literata:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1B2A5B; --navy-deep:#131F45; --orange:#F5A623; --orange-deep:#DB8F13;
+    --bg:#F5F6FA; --white:#FFFFFF; --border:#E2E6F2; --ink:#1F2430; --ink-soft:#4B5163; --ink-faint:#7A8098;
+    --danger:#C0392B; --success:#2E9E5B;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;font-size:15px;}
+  h1,h2{font-family:'Literata',serif;color:var(--navy-deep);margin:0 0 4px 0;}
+
+  .gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+  .gate-card{background:#fff;border-radius:20px;padding:40px 36px;max-width:380px;width:100%;box-shadow:0 10px 40px rgba(19,31,69,0.08);}
+  .gate-card h1{font-size:1.5rem;text-align:center;}
+  .gate-card p.sub{text-align:center;color:var(--ink-faint);font-size:.9rem;margin-bottom:24px;}
+  .gate-card input{width:100%;padding:13px 16px;border-radius:10px;border:1px solid var(--border);font-size:.95rem;margin-bottom:14px;}
+  .gate-card button{width:100%;padding:13px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-weight:600;cursor:pointer;font-size:.95rem;}
+  .gate-card button:hover{background:var(--navy-deep);}
+  .gate-msg{font-size:.85rem;color:var(--danger);min-height:1.2em;margin-top:8px;text-align:center;}
+
+  #dashboard{display:none;}
+  .topbar{background:var(--navy);color:#fff;padding:16px 28px;display:flex;justify-content:space-between;align-items:center;}
+  .topbar .title{font-family:'Literata',serif;font-weight:700;font-size:1.15rem;}
+  .topbar .title span{color:var(--orange);}
+  .topbar button{background:rgba(255,255,255,.12);color:#fff;border:none;padding:9px 18px;border-radius:999px;font-size:.85rem;font-weight:600;cursor:pointer;}
+  .topbar button:hover{background:rgba(255,255,255,.22);}
+
+  .content{max-width:1180px;margin:0 auto;padding:32px 24px 80px;}
+
+  .stat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:36px;}
+  .stat-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px;text-align:center;}
+  .stat-card .num{font-family:'Literata',serif;font-size:1.8rem;font-weight:700;color:var(--navy-deep);}
+  .stat-card .label{font-size:.78rem;color:var(--ink-faint);margin-top:4px;}
+  @media (max-width:900px){ .stat-grid{grid-template-columns:repeat(2,1fr);} }
+
+  .panel{background:#fff;border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:28px;}
+  .panel h2{font-size:1.1rem;margin-bottom:14px;}
+  .panel .panel-sub{font-size:.85rem;color:var(--ink-faint);margin-bottom:16px;}
+
+  table{width:100%;border-collapse:collapse;font-size:.87rem;}
+  th{text-align:left;color:var(--ink-faint);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--border);font-size:.78rem;text-transform:uppercase;letter-spacing:.03em;}
+  td{padding:10px;border-bottom:1px solid #F0F1F6;vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  .empty-row td{color:var(--ink-faint);text-align:center;padding:24px;}
+  .scroll-box{max-height:320px;overflow-y:auto;}
+
+  .del-btn{background:#FBEAE8;color:var(--danger);border:none;padding:6px 12px;border-radius:8px;font-size:.78rem;cursor:pointer;font-weight:600;}
+  .del-btn:hover{background:#F6D5D1;}
+
+  .pw-form{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+  .pw-form .field{display:flex;flex-direction:column;gap:6px;}
+  .pw-form input{padding:11px 14px;border-radius:8px;border:1px solid var(--border);}
+  .pw-form button{background:var(--navy);color:#fff;border:none;padding:11px 20px;border-radius:8px;cursor:pointer;font-weight:600;}
+  .pw-form button:hover{background:var(--navy-deep);}
+  .save-msg{font-size:.85rem;margin-left:8px;}
+
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:28px;}
+  @media (max-width:900px){ .two-col{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+
+<div class="gate" id="gateScreen">
+  <div class="gate-card">
+    <h1>Saga</h1>
+    <p class="sub">BLL admin — authorized access only.</p>
+    <input type="password" id="gatePassword" placeholder="Admin password" autofocus>
+    <button id="gateSubmit">Enter</button>
+    <div class="gate-msg" id="gateMsg"></div>
+  </div>
+</div>
+
+<div id="dashboard">
+  <div class="topbar">
+    <div class="title">Saga <span>·</span> BLL Admin</div>
+    <button id="logoutBtn">Log Out</button>
+  </div>
+
+  <div class="content">
+
+    <div class="stat-grid">
+      <div class="stat-card"><div class="num" id="statVisitors">–</div><div class="label">Total Visits</div></div>
+      <div class="stat-card"><div class="num" id="statSubscribers">–</div><div class="label">Subscribers</div></div>
+      <div class="stat-card"><div class="num" id="statUsers">–</div><div class="label">Registered Users</div></div>
+      <div class="stat-card"><div class="num" id="statComments">–</div><div class="label">Comments</div></div>
+      <div class="stat-card"><div class="num" id="statDecoy">–</div><div class="label">Admin-Page Attempts</div></div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <h2>Recent Visitors</h2>
+        <p class="panel-sub">Every page load across the site, most recent first.</p>
+        <div class="scroll-box">
+          <table>
+            <thead><tr><th>Page</th><th>IP</th><th>Referrer</th><th>When</th></tr></thead>
+            <tbody id="visitorsBody"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Admin-Page Access Attempts</h2>
+        <p class="panel-sub">Anyone who visited /admin.html trying to find the real dashboard — they were shown a plain 404 and never knew.</p>
+        <div class="scroll-box">
+          <table>
+            <thead><tr><th>IP</th><th>Device</th><th>When</th></tr></thead>
+            <tbody id="decoyBody"><tr class="empty-row"><td colspan="3">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <h2>Subscribers</h2>
+        <p class="panel-sub">Everyone who joined the mailing list.</p>
+        <div class="scroll-box">
+          <table>
+            <thead><tr><th>Email</th><th>Joined</th></tr></thead>
+            <tbody id="subscribersBody"><tr class="empty-row"><td colspan="2">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Registered Users</h2>
+        <p class="panel-sub">People with a full BLL account.</p>
+        <div class="scroll-box">
+          <table>
+            <thead><tr><th>Name</th><th>Email</th><th>Joined</th></tr></thead>
+            <tbody id="usersBody"><tr class="empty-row"><td colspan="3">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Comments</h2>
+      <p class="panel-sub">Across every blog post and course page. Delete anything that shouldn't be there.</p>
+      <div class="scroll-box">
+        <table>
+          <thead><tr><th>Name</th><th>Page</th><th>Comment</th><th>When</th><th></th></tr></thead>
+          <tbody id="commentsBody"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Likes by Page</h2>
+      <div class="scroll-box">
+        <table>
+          <thead><tr><th>Page</th><th>Likes</th></tr></thead>
+          <tbody id="likesBody"><tr class="empty-row"><td colspan="2">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Change Admin Password</h2>
+      <p class="panel-sub">Default is <code>sagahtml</code> — change it once you're set up here.</p>
+      <div class="pw-form">
+        <div class="field">
+          <label style="font-size:.8rem;font-weight:600;">New password</label>
+          <input type="password" id="newAdminPw" placeholder="New password">
+        </div>
+        <button id="changePwBtn">Update Password</button>
+        <span class="save-msg" id="pwMsg"></span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script type="module" src="js/firebase-init.js"></script>
+<script>
+  function esc(str){ const d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML; }
+  function fmtTime(ts){
+    if (!ts || !ts.toDate) return '—';
+    return new Date(ts.toDate()).toLocaleString();
+  }
+
+  function waitForBLL(cb){
+    if (window.BLL) cb(); else setTimeout(() => waitForBLL(cb), 250);
+  }
+
+  waitForBLL(() => {
+    const gateScreen = document.getElementById('gateScreen');
+    const dashboard = document.getElementById('dashboard');
+
+    function enterDashboard(){
+      gateScreen.style.display = 'none';
+      dashboard.style.display = 'block';
+      loadAllData();
+    }
+
+    if (window.BLL.adminSessionActive()) {
+      enterDashboard();
+    }
+
+    document.getElementById('gateSubmit').addEventListener('click', submitGate);
+    document.getElementById('gatePassword').addEventListener('keydown', (e) => { if (e.key === 'Enter') submitGate(); });
+
+    async function submitGate(){
+      const pw = document.getElementById('gatePassword').value;
+      const msg = document.getElementById('gateMsg');
+      msg.textContent = 'Checking...';
+      const ok = await window.BLL.checkAdminPassword(pw);
+      if (ok){
+        window.BLL.setAdminSession(true);
+        enterDashboard();
+      } else {
+        msg.textContent = 'Incorrect password.';
+      }
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      window.BLL.setAdminSession(false);
+      window.location.reload();
+    });
+
+    document.getElementById('changePwBtn').addEventListener('click', async () => {
+      const newPw = document.getElementById('newAdminPw').value;
+      const pwMsg = document.getElementById('pwMsg');
+      pwMsg.textContent = 'Saving...';
+      pwMsg.style.color = 'var(--ink-faint)';
+      const result = await window.BLL.changeAdminPassword(newPw);
+      pwMsg.textContent = result.message;
+      pwMsg.style.color = result.ok ? 'var(--success)' : 'var(--danger)';
+      if (result.ok) document.getElementById('newAdminPw').value = '';
+    });
+
+    async function loadAllData(){
+      const [visitors, decoy, subscribers, users, comments, likes] = await Promise.all([
+        window.BLL.getAllVisitors(),
+        window.BLL.getAllDecoyVisits(),
+        window.BLL.getAllSubscribers(),
+        window.BLL.getAllUsers(),
+        window.BLL.getAllComments(),
+        window.BLL.getAllLikes()
+      ]);
+
+      document.getElementById('statVisitors').textContent = visitors.length;
+      document.getElementById('statSubscribers').textContent = subscribers.length;
+      document.getElementById('statUsers').textContent = users.length;
+      document.getElementById('statComments').textContent = comments.length;
+      document.getElementById('statDecoy').textContent = decoy.length;
+
+      const visitorsBody = document.getElementById('visitorsBody');
+      visitorsBody.innerHTML = visitors.length ? visitors.slice(0, 100).map(v => `
+        <tr><td>${esc(v.page)}</td><td>${esc(v.ip)}</td><td>${esc(v.referrer)}</td><td>${fmtTime(v.timestamp)}</td></tr>
+      `).join('') : '<tr class="empty-row"><td colspan="4">No visits logged yet.</td></tr>';
+
+      const decoyBody = document.getElementById('decoyBody');
+      decoyBody.innerHTML = decoy.length ? decoy.map(v => `
+        <tr><td>${esc(v.ip)}</td><td>${esc((v.userAgent||'').slice(0,40))}...</td><td>${fmtTime(v.timestamp)}</td></tr>
+      `).join('') : '<tr class="empty-row"><td colspan="3">Nobody has poked at /admin.html yet.</td></tr>';
+
+      const subscribersBody = document.getElementById('subscribersBody');
+      subscribersBody.innerHTML = subscribers.length ? subscribers.map(s => `
+        <tr><td>${esc(s.email)}</td><td>${fmtTime(s.subscribedAt)}</td></tr>
+      `).join('') : '<tr class="empty-row"><td colspan="2">No subscribers yet.</td></tr>';
+
+      const usersBody = document.getElementById('usersBody');
+      usersBody.innerHTML = users.length ? users.map(u => `
+        <tr><td>${esc(u.name)}</td><td>${esc(u.email)}</td><td>${fmtTime(u.joinedAt)}</td></tr>
+      `).join('') : '<tr class="empty-row"><td colspan="3">No registered users yet.</td></tr>';
+
+      renderComments(comments);
+
+      const likesBody = document.getElementById('likesBody');
+      likesBody.innerHTML = likes.length ? likes.map(l => `
+        <tr><td>${esc(l.id)}</td><td>${l.count || 0}</td></tr>
+      `).join('') : '<tr class="empty-row"><td colspan="2">No likes yet.</td></tr>';
+    }
+
+    function renderComments(comments){
+      const body = document.getElementById('commentsBody');
+      if (!comments.length){
+        body.innerHTML = '<tr class="empty-row"><td colspan="5">No comments yet.</td></tr>';
+        return;
+      }
+      body.innerHTML = comments.map(c => `
+        <tr>
+          <td>${esc(c.name)}</td>
+          <td>${esc(c.pageId)}</td>
+          <td>${esc(c.text)}</td>
+          <td>${fmtTime(c.timestamp)}</td>
+          <td><button class="del-btn" data-id="${c.id}">Delete</button></td>
+        </tr>
+      `).join('');
+
+      body.querySelectorAll('.del-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          btn.textContent = '...';
+          await window.BLL.deleteComment(btn.dataset.id);
+          const updated = await window.BLL.getAllComments();
+          renderComments(updated);
+          document.getElementById('statComments').textContent = updated.length;
+        });
+      });
+    }
+  });
+</script>
+</body>
+</html>
