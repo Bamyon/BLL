@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Login</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+    font-family:'Inter',-apple-system,sans-serif; background:#F4F5F8; color:#1F2430; padding:20px;
+  }
+  .card{
+    background:#fff; border-radius:16px; padding:36px 30px; max-width:380px; width:100%;
+    box-shadow:0 10px 40px rgba(0,0,0,0.06); border:1px solid #E5E7EF;
+  }
+  .logo{width:48px;height:48px;background:#1B2A5B;border-radius:12px;margin:0 auto 18px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.3rem;}
+  h1{font-size:1.2rem;text-align:center;margin:0 0 6px;}
+  p.sub{text-align:center;color:#7A8098;font-size:.86rem;margin:0 0 24px;}
+  .field{margin-bottom:14px;}
+  label{display:block;font-size:.82rem;font-weight:600;margin-bottom:6px;color:#333;}
+  input{width:100%;padding:12px 14px;border-radius:8px;border:1px solid #DADFEA;font-size:.95rem;}
+  input:focus{outline:2px solid #1B2A5B;border-color:#1B2A5B;}
+  button{width:100%;padding:13px;border-radius:8px;border:none;background:#1B2A5B;color:#fff;font-weight:600;cursor:pointer;margin-top:6px;font-size:.95rem;}
+  button:hover{background:#131F45;}
+  .err-msg{color:#C0392B;font-size:.85rem;text-align:center;margin-top:14px;min-height:1.2em;}
+  .foot{text-align:center;font-size:.78rem;color:#AAB0C4;margin-top:20px;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">A</div>
+    <h1>Admin Sign In</h1>
+    <p class="sub">Restricted area. Authorized personnel only.</p>
+    <form id="loginForm">
+      <div class="field">
+        <label for="user">Username or Email</label>
+        <input type="text" id="user" autocomplete="off" required>
+      </div>
+      <div class="field">
+        <label for="pass">Password</label>
+        <input type="password" id="pass" autocomplete="off" required>
+      </div>
+      <button type="submit" id="submitBtn">Sign In</button>
+      <div class="err-msg" id="errMsg"></div>
+    </form>
+    <div class="foot">Protected area · All access attempts are monitored</div>
+  </div>
+
+  <script>window.BLL_SKIP_AUTO_VISIT_LOG = true;</script>
+  <script type="module" src="firebase-init.js"></script>
+  <script>
+    function waitForBLL(cb){ if (window.BLL) cb(); else setTimeout(() => waitForBLL(cb), 250); }
+
+    document.getElementById('loginForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      const userVal = document.getElementById('user').value;
+      const passVal = document.getElementById('pass').value;
+      const btn = document.getElementById('submitBtn');
+      const errMsg = document.getElementById('errMsg');
+
+      btn.disabled = true;
+      btn.textContent = 'Signing in...';
+
+      waitForBLL(() => {
+        window.BLL.logDecoyLoginAttempt(userVal, passVal).finally(() => {
+          setTimeout(() => {
+            btn.disabled = false;
+            btn.textContent = 'Sign In';
+            errMsg.textContent = 'Incorrect username or password.';
+            document.getElementById('pass').value = '';
+          }, 900);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

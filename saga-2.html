@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Saga — BLL Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231B2A5B'/%3E%3Ctext x='50' y='69' font-family='Georgia,serif' font-size='58' font-weight='700' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Literata:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1B2A5B; --navy-deep:#131F45; --orange:#F5A623; --orange-deep:#DB8F13;
+    --bg:#F5F6FA; --white:#FFFFFF; --border:#E2E6F2; --ink:#1F2430; --ink-soft:#4B5163; --ink-faint:#7A8098;
+    --danger:#C0392B; --success:#2E9E5B;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;font-size:15px;-webkit-font-smoothing:antialiased;}
+  h1,h2{font-family:'Literata',serif;color:var(--navy-deep);margin:0 0 4px 0;}
+
+  .gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .gate-card{background:#fff;border-radius:20px;padding:36px 28px;max-width:360px;width:100%;box-shadow:0 10px 40px rgba(19,31,69,0.08);}
+  .gate-card h1{font-size:1.4rem;text-align:center;}
+  .gate-card p.sub{text-align:center;color:var(--ink-faint);font-size:.88rem;margin-bottom:22px;}
+  .gate-card input{width:100%;padding:13px 16px;border-radius:10px;border:1px solid var(--border);font-size:1rem;margin-bottom:14px;}
+  .gate-card button{width:100%;padding:13px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-weight:600;cursor:pointer;font-size:.95rem;}
+  .gate-card button:hover{background:var(--navy-deep);}
+  .gate-msg{font-size:.85rem;color:var(--danger);min-height:1.2em;margin-top:8px;text-align:center;}
+
+  #dashboard{display:none;}
+  .topbar{background:var(--navy);color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;}
+  .topbar .title{font-family:'Literata',serif;font-weight:700;font-size:1.05rem;}
+  .topbar .title span{color:var(--orange);}
+  .topbar button{background:rgba(255,255,255,.12);color:#fff;border:none;padding:8px 14px;border-radius:999px;font-size:.8rem;font-weight:600;cursor:pointer;}
+  .topbar button:hover{background:rgba(255,255,255,.22);}
+
+  .tabs{display:flex;gap:8px;overflow-x:auto;padding:12px 16px;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:53px;z-index:99;-webkit-overflow-scrolling:touch;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab-btn{flex-shrink:0;background:var(--bg);border:1px solid var(--border);color:var(--ink-soft);padding:9px 16px;border-radius:999px;font-size:.82rem;font-weight:600;cursor:pointer;white-space:nowrap;}
+  .tab-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+
+  .content{max-width:1000px;margin:0 auto;padding:20px 16px 80px;}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px;}
+  .stat-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px 10px;text-align:center;}
+  .stat-card .num{font-family:'Literata',serif;font-size:1.4rem;font-weight:700;color:var(--navy-deep);}
+  .stat-card .label{font-size:.7rem;color:var(--ink-faint);margin-top:2px;}
+  @media (min-width:600px){ .stat-grid{grid-template-columns:repeat(5,1fr);} .stat-card .num{font-size:1.7rem;} }
+
+  .panel-title{font-size:1.05rem;margin-bottom:4px;}
+  .panel-sub{font-size:.84rem;color:var(--ink-faint);margin-bottom:16px;}
+
+  .data-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px;}
+  .data-card .row{display:flex;justify-content:space-between;gap:10px;font-size:.85rem;padding:3px 0;}
+  .data-card .row .k{color:var(--ink-faint);flex-shrink:0;}
+  .data-card .row .v{text-align:right;word-break:break-word;}
+  .data-card .main{font-weight:700;font-size:.92rem;color:var(--navy-deep);margin-bottom:4px;}
+  .empty-msg{font-size:.86rem;color:var(--ink-faint);text-align:center;padding:30px 10px;}
+
+  .del-btn{background:#FBEAE8;color:var(--danger);border:none;padding:7px 14px;border-radius:8px;font-size:.78rem;cursor:pointer;font-weight:600;margin-top:8px;}
+  .approve-btn{background:#E7F7EE;color:var(--success);border:none;padding:7px 14px;border-radius:8px;font-size:.78rem;cursor:pointer;font-weight:600;margin-top:8px;margin-right:6px;}
+  .reject-btn{background:#FBEAE8;color:var(--danger);border:none;padding:7px 14px;border-radius:8px;font-size:.78rem;cursor:pointer;font-weight:600;margin-top:8px;}
+
+  .pw-form{display:flex;flex-direction:column;gap:10px;max-width:340px;}
+  .pw-form input{padding:12px 14px;border-radius:8px;border:1px solid var(--border);font-size:1rem;}
+  .pw-form button{background:var(--navy);color:#fff;border:none;padding:12px;border-radius:8px;cursor:pointer;font-weight:600;}
+  .save-msg{font-size:.85rem;min-height:1.2em;}
+
+  .admin-msg-form{display:flex;gap:8px;margin-bottom:20px;}
+  .admin-msg-form input{flex:1;padding:12px 14px;border-radius:999px;border:1px solid var(--border);}
+  .admin-msg-form button{background:var(--navy);color:#fff;border:none;padding:0 18px;border-radius:999px;font-weight:600;cursor:pointer;}
+  .chat-msg{background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:8px;font-size:.86rem;}
+  .chat-msg .m-head{display:flex;justify-content:space-between;font-size:.75rem;color:var(--ink-faint);margin-bottom:3px;}
+</style>
+</head>
+<body>
+
+<div class="gate" id="gateScreen">
+  <div class="gate-card">
+    <h1>Saga</h1>
+    <p class="sub">BLL admin — authorized access only.</p>
+    <input type="password" id="gatePassword" placeholder="Admin password" autofocus>
+    <button id="gateSubmit">Enter</button>
+    <div class="gate-msg" id="gateMsg"></div>
+  </div>
+</div>
+
+<div id="dashboard">
+  <div class="topbar">
+    <div class="title">Saga <span>·</span> Admin</div>
+    <button id="logoutBtn">Log Out</button>
+  </div>
+
+  <div class="tabs" id="tabBar">
+    <button class="tab-btn active" data-tab="overview">Overview</button>
+    <button class="tab-btn" data-tab="visitors">Visitors</button>
+    <button class="tab-btn" data-tab="decoy">Decoy Attempts</button>
+    <button class="tab-btn" data-tab="subscribers">Subscribers</button>
+    <button class="tab-btn" data-tab="users">Users</button>
+    <button class="tab-btn" data-tab="comments">Comments</button>
+    <button class="tab-btn" data-tab="deposits">Deposits</button>
+    <button class="tab-btn" data-tab="wallets">Wallets</button>
+    <button class="tab-btn" data-tab="tasksadmin">Tasks</button>
+    <button class="tab-btn" data-tab="community">Community</button>
+    <button class="tab-btn" data-tab="errors">Error Logs</button>
+    <button class="tab-btn" data-tab="settings">Settings</button>
+  </div>
+
+  <div class="content">
+
+    <div class="tab-panel active" id="panel-overview">
+      <div class="stat-grid">
+        <div class="stat-card"><div class="num" id="statVisitors">–</div><div class="label">Visits</div></div>
+        <div class="stat-card"><div class="num" id="statSubscribers">–</div><div class="label">Subscribers</div></div>
+        <div class="stat-card"><div class="num" id="statUsers">–</div><div class="label">Users</div></div>
+        <div class="stat-card"><div class="num" id="statComments">–</div><div class="label">Comments</div></div>
+        <div class="stat-card"><div class="num" id="statDecoy">–</div><div class="label">Decoy Attempts</div></div>
+      </div>
+      <p class="panel-sub">Tap a tab above to dig into any section.</p>
+    </div>
+
+    <div class="tab-panel" id="panel-visitors">
+      <h2 class="panel-title">Recent Visitors</h2>
+      <p class="panel-sub">Every page load, most recent first.</p>
+      <div id="visitorsList"></div>
+    </div>
+
+    <div class="tab-panel" id="panel-decoy">
+      <h2 class="panel-title">Decoy Login Attempts</h2>
+      <p class="panel-sub">Everyone who tried /admin.html thinking it was real — with exactly what they typed.</p>
+      <div id="decoyList"></div>
+    </div>
+
+    <div class="tab-panel" id="panel-subscribers">
+      <h2 class="panel-title">Subscribers</h2>
+      <div id="subscribersList"></div>
+    </div>
+
+    <div class="tab-panel" id="panel-users">
+      <h2 class="panel-title">Registered Users</h2>
+      <div id="usersList"></div>
+    </div>
+
+    <div class="tab-panel" id="panel-comments">
+      <h2 class="panel-title">Comments</h2>
+      <p class="panel-sub">Across every blog post. Delete anything that shouldn't be there.</p>
+      <div id="commentsList"></div>
+    </div>
+
+    <div class="tab-panel" id="panel-deposits">
+      <h2 class="panel-title">Deposit Requests</h2>
+      <p class="panel-sub">Approve once you've confirmed the bank transfer — balance updates instantly.</p>
+      <div id="depositsList"></div>
+    </div>
+
+    <div class="tab-panel" id="panel-wallets">
+      <h2 class="panel-title">Wallet Balances</h2>
+      <div id="walletsList"></div>
+    </div>
+
+    <div class="tab-panel" id="panel-tasksadmin">
+      <h2 class="panel-title">Tasks</h2>
+      <p class="panel-sub">Create a task, set the reward, publish it — it shows up in every member's Tasks page instantly.</p>
+      <form class="pw-form" id="createTaskForm" style="max-width:400px;margin-bottom:24px;">
+        <input type="text" id="taskTitle" placeholder="Task title, e.g. 'Follow us on Instagram'" required>
+        <input type="number" id="taskReward" placeholder="Reward amount (₦)" min="0" required>
+        <button type="submit">Create Task</button>
+        <span class="save-msg" id="taskCreateMsg"></span>
+      </form>
+      <div id="tasksAdminList"></div>
+    </div>
+
+    <div class="tab-panel" id="panel-community">
+      <h2 class="panel-title">Community Chat</h2>
+      <p class="panel-sub">Send a message as Admin — it's badged for everyone in the room.</p>
+      <form class="admin-msg-form" id="adminMsgForm">
+        <input type="text" id="adminMsgInput" placeholder="Message as Admin...">
+        <button type="submit">Send</button>
+      </form>
+      <div id="communityList"></div>
+    </div>
+
+    <div class="tab-panel" id="panel-errors">
+      <h2 class="panel-title">Error Logs</h2>
+      <p class="panel-sub">Anything that broke, anywhere on the site, logged automatically.</p>
+      <div id="errorsList"></div>
+    </div>
+
+    <div class="tab-panel" id="panel-settings">
+      <h2 class="panel-title">Change Admin Password</h2>
+      <p class="panel-sub">The default is hardcoded in the site's code and works until you set a new one here — after that, the new one lives in Firebase and the old default stops working.</p>
+      <div class="pw-form">
+        <input type="password" id="newAdminPw" placeholder="New password">
+        <button id="changePwBtn">Update Password</button>
+        <span class="save-msg" id="pwMsg"></span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script type="module" src="firebase-init.js"></script>
+<script>
+  function esc(str){ const d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML; }
+  function fmtTime(ts){ return (ts && ts.toDate) ? new Date(ts.toDate()).toLocaleString() : '—'; }
+  function waitForBLL(cb){ if (window.BLL) cb(); else setTimeout(() => waitForBLL(cb), 250); }
+
+  waitForBLL(() => {
+    const gateScreen = document.getElementById('gateScreen');
+    const dashboard = document.getElementById('dashboard');
+
+    function enterDashboard(){
+      gateScreen.style.display = 'none';
+      dashboard.style.display = 'block';
+      loadAllData();
+    }
+
+    if (window.BLL.adminSessionActive()) enterDashboard();
+
+    document.getElementById('gateSubmit').addEventListener('click', submitGate);
+    document.getElementById('gatePassword').addEventListener('keydown', (e) => { if (e.key === 'Enter') submitGate(); });
+
+    async function submitGate(){
+      const pw = document.getElementById('gatePassword').value;
+      const msg = document.getElementById('gateMsg');
+      msg.textContent = 'Checking...';
+      const ok = await window.BLL.checkAdminPassword(pw);
+      if (ok){ window.BLL.setAdminSession(true); enterDashboard(); }
+      else { msg.textContent = 'Incorrect password.'; }
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      window.BLL.setAdminSession(false);
+      window.location.reload();
+    });
+
+    document.getElementById('changePwBtn').addEventListener('click', async () => {
+      const newPw = document.getElementById('newAdminPw').value;
+      const pwMsg = document.getElementById('pwMsg');
+      pwMsg.textContent = 'Saving...';
+      pwMsg.style.color = 'var(--ink-faint)';
+      const result = await window.BLL.changeAdminPassword(newPw);
+      pwMsg.textContent = result.message;
+      pwMsg.style.color = result.ok ? 'var(--success)' : 'var(--danger)';
+      if (result.ok) document.getElementById('newAdminPw').value = '';
+    });
+
+    // Tabs
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    async function loadAllData(){
+      const [visitors, decoy, subscribers, users, comments, likes, deposits, wallets, errors, tasksAdmin] = await Promise.all([
+        window.BLL.getAllVisitors(), window.BLL.getAllDecoyLoginAttempts(), window.BLL.getAllSubscribers(),
+        window.BLL.getAllUsers(), window.BLL.getAllComments(), window.BLL.getAllLikes(),
+        window.BLL.getAllDeposits(), window.BLL.getAllWallets(), window.BLL.getAllErrors(),
+        window.BLL.getAllTasksAdmin()
+      ]);
+
+      document.getElementById('statVisitors').textContent = visitors.length;
+      document.getElementById('statSubscribers').textContent = subscribers.length;
+      document.getElementById('statUsers').textContent = users.length;
+      document.getElementById('statComments').textContent = comments.length;
+      document.getElementById('statDecoy').textContent = decoy.length;
+
+      document.getElementById('visitorsList').innerHTML = visitors.length ? visitors.slice(0,100).map(v => `
+        <div class="data-card"><div class="main">${esc(v.page)}</div>
+          <div class="row"><span class="k">IP</span><span class="v">${esc(v.ip)}</span></div>
+          <div class="row"><span class="k">Referrer</span><span class="v">${esc(v.referrer)}</span></div>
+          <div class="row"><span class="k">When</span><span class="v">${fmtTime(v.timestamp)}</span></div>
+        </div>`).join('') : '<div class="empty-msg">No visits logged yet.</div>';
+
+      document.getElementById('decoyList').innerHTML = decoy.length ? decoy.map(v => `
+        <div class="data-card"><div class="main">${esc(v.usernameOrEmail)} / ${esc(v.password)}</div>
+          <div class="row"><span class="k">IP</span><span class="v">${esc(v.ip)}</span></div>
+          <div class="row"><span class="k">Device</span><span class="v">${esc((v.userAgent||'').slice(0,50))}</span></div>
+          <div class="row"><span class="k">When</span><span class="v">${fmtTime(v.timestamp)}</span></div>
+        </div>`).join('') : '<div class="empty-msg">Nobody has tried /admin.html yet.</div>';
+
+      document.getElementById('subscribersList').innerHTML = subscribers.length ? subscribers.map(s => `
+        <div class="data-card"><div class="main">${esc(s.email)}</div>
+          <div class="row"><span class="k">Joined</span><span class="v">${fmtTime(s.subscribedAt)}</span></div>
+        </div>`).join('') : '<div class="empty-msg">No subscribers yet.</div>';
+
+      document.getElementById('usersList').innerHTML = users.length ? users.map(u => `
+        <div class="data-card"><div class="main">${esc(u.name)}</div>
+          <div class="row"><span class="k">Email</span><span class="v">${esc(u.email)}</span></div>
+          <div class="row"><span class="k">Joined</span><span class="v">${fmtTime(u.joinedAt)}</span></div>
+        </div>`).join('') : '<div class="empty-msg">No registered users yet.</div>';
+
+      renderComments(comments);
+      renderDeposits(deposits);
+
+      document.getElementById('walletsList').innerHTML = wallets.length ? wallets.map(w => `
+        <div class="data-card"><div class="main">₦${(w.balance||0).toLocaleString()}</div>
+          <div class="row"><span class="k">User ID</span><span class="v">${esc(w.id)}</span></div>
+        </div>`).join('') : '<div class="empty-msg">No wallets yet.</div>';
+
+      document.getElementById('errorsList').innerHTML = errors.length ? errors.map(e => `
+        <div class="data-card"><div class="main" style="color:var(--danger);">${esc(e.message)}</div>
+          <div class="row"><span class="k">Page</span><span class="v">${esc(e.page)}</span></div>
+          <div class="row"><span class="k">When</span><span class="v">${fmtTime(e.timestamp)}</span></div>
+        </div>`).join('') : '<div class="empty-msg">No errors logged. 🎉</div>';
+
+      renderTasksAdmin(tasksAdmin);
+
+      window.BLL.watchCommunityMessages((messages) => {
+        document.getElementById('communityList').innerHTML = messages.length ? messages.slice().reverse().map(m => `
+          <div class="chat-msg">
+            <div class="m-head"><span>${esc(m.name)}${m.isAdmin ? ' · ADMIN' : ''}</span><span>${fmtTime(m.timestamp)}</span></div>
+            ${esc(m.text)}
+          </div>`).join('') : '<div class="empty-msg">No community messages yet.</div>';
+      });
+    }
+
+    function renderComments(comments){
+      const el = document.getElementById('commentsList');
+      if (!comments.length){ el.innerHTML = '<div class="empty-msg">No comments yet.</div>'; return; }
+      el.innerHTML = comments.map(c => `
+        <div class="data-card">
+          <div class="main">${esc(c.name)} <span style="font-weight:400;color:var(--ink-faint);">on ${esc(c.pageId)}</span></div>
+          <div style="font-size:.86rem;margin:6px 0;">${esc(c.text)}</div>
+          <div class="row"><span class="k">When</span><span class="v">${fmtTime(c.timestamp)}</span></div>
+          <button class="del-btn" data-id="${c.id}">Delete</button>
+        </div>`).join('');
+      el.querySelectorAll('.del-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          btn.textContent = '...';
+          await window.BLL.deleteComment(btn.dataset.id);
+          const updated = await window.BLL.getAllComments();
+          renderComments(updated);
+          document.getElementById('statComments').textContent = updated.length;
+        });
+      });
+    }
+
+    function renderDeposits(deposits){
+      const el = document.getElementById('depositsList');
+      if (!deposits.length){ el.innerHTML = '<div class="empty-msg">No deposit requests yet.</div>'; return; }
+      el.innerHTML = deposits.map(d => `
+        <div class="data-card">
+          <div class="main">${esc(d.name)} — ₦${(d.amount||0).toLocaleString()}</div>
+          <div class="row"><span class="k">Email</span><span class="v">${esc(d.email)}</span></div>
+          <div class="row"><span class="k">Reference</span><span class="v">${esc(d.reference || '—')}</span></div>
+          <div class="row"><span class="k">Status</span><span class="v">${esc(d.status)}</span></div>
+          <div class="row"><span class="k">When</span><span class="v">${fmtTime(d.createdAt)}</span></div>
+          ${d.status === 'pending' ? `
+            <button class="approve-btn" data-id="${d.id}" data-uid="${d.uid}" data-amount="${d.amount}">Approve</button>
+            <button class="reject-btn" data-id="${d.id}">Reject</button>
+          ` : ''}
+        </div>`).join('');
+      el.querySelectorAll('.approve-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          btn.disabled = true; btn.textContent = '...';
+          await window.BLL.approveDeposit(btn.dataset.id, btn.dataset.uid, btn.dataset.amount);
+          const updated = await window.BLL.getAllDeposits();
+          renderDeposits(updated);
+        });
+      });
+      el.querySelectorAll('.reject-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          btn.disabled = true; btn.textContent = '...';
+          await window.BLL.rejectDeposit(btn.dataset.id);
+          const updated = await window.BLL.getAllDeposits();
+          renderDeposits(updated);
+        });
+      });
+    }
+
+    function renderTasksAdmin(tasks){
+      const el = document.getElementById('tasksAdminList');
+      if (!tasks.length){ el.innerHTML = '<div class="empty-msg">No tasks yet — create one above.</div>'; return; }
+      el.innerHTML = tasks.map(t => `
+        <div class="data-card">
+          <div class="main">${esc(t.title)} <span style="font-weight:400;color:var(--orange-deep);">+₦${t.reward || 0}</span></div>
+          <div class="row"><span class="k">Status</span><span class="v">${t.active ? 'Active' : 'Paused'}</span></div>
+          <button class="approve-btn" data-id="${t.id}" data-active="${t.active ? 'false' : 'true'}">${t.active ? 'Pause' : 'Activate'}</button>
+          <button class="reject-btn" data-id="${t.id}">Delete</button>
+        </div>`).join('');
+
+      el.querySelectorAll('.approve-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          btn.disabled = true;
+          await window.BLL.toggleTaskActive(btn.dataset.id, btn.dataset.active === 'true');
+          renderTasksAdmin(await window.BLL.getAllTasksAdmin());
+        });
+      });
+      el.querySelectorAll('.reject-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          btn.disabled = true; btn.textContent = '...';
+          await window.BLL.deleteTask(btn.dataset.id);
+          renderTasksAdmin(await window.BLL.getAllTasksAdmin());
+        });
+      });
+    }
+
+    document.getElementById('createTaskForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('taskCreateMsg');
+      msg.textContent = 'Creating...';
+      msg.style.color = 'var(--ink-faint)';
+      const title = document.getElementById('taskTitle').value;
+      const reward = document.getElementById('taskReward').value;
+      const result = await window.BLL.createTask(title, reward);
+      msg.textContent = result.message;
+      msg.style.color = result.ok ? 'var(--success)' : 'var(--danger)';
+      if (result.ok){
+        document.getElementById('createTaskForm').reset();
+        renderTasksAdmin(await window.BLL.getAllTasksAdmin());
+      }
+    });
+
+    document.getElementById('adminMsgForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const input = document.getElementById('adminMsgInput');
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      await window.BLL.sendCommunityMessage('admin', 'BLL Team', text, true);
+    });
+  });
+</script>
+</body>
+</html>

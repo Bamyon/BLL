@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>Tasks — BLL</title>
+<meta name="description" content="Complete simple tasks to earn wallet credit on BLL.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231B2A5B'/%3E%3Ctext x='50' y='69' font-family='Georgia,serif' font-size='58' font-weight='700' fill='white' text-anchor='middle'%3EB%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600;0,7..72,700;1,7..72,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --bg:#F7F8FB; --bg-alt:#EEF1FA; --bg-warm:#FFF6E6;
+    --navy:#1B2A5B; --navy-deep:#131F45;
+    --orange:#F5A623; --orange-deep:#DB8F13;
+    --ink:#1F2430; --ink-soft:#4B5163; --ink-faint:#7A8098;
+    --white:#FFFFFF; --border:#E2E6F2; --danger:#C0392B; --success:#2E9E5B;
+    --font-serif:'Literata',Georgia,serif; --font-sans:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    --max-w:1180px; --radius-s:10px; --radius-m:16px; --radius-l:28px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion:reduce){ *{animation-duration:.001ms!important;transition-duration:.001ms!important;} }
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+  h1,h2,h3{font-family:var(--font-serif);font-weight:600;line-height:1.15;margin:0 0 .5em 0;color:var(--navy-deep);}
+  p{margin:0 0 1em 0;color:var(--ink-soft);}
+  a{color:inherit;text-decoration:none;}
+  img,svg{max-width:100%;}
+  .wrap{max-width:var(--max-w);margin:0 auto;padding:0 20px;}
+  .skip-link{position:absolute;left:-999px;top:0;background:var(--navy);color:#fff;padding:12px 18px;border-radius:0 0 8px 0;z-index:999;}
+  .skip-link:focus{left:0;}
+  a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--orange);outline-offset:2px;}
+  section{padding:64px 0;}
+  @media (max-width:720px){ section{padding:40px 0;} .wrap{padding:0 16px;} }
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-sans);font-weight:600;font-size:.96rem;padding:13px 24px;border-radius:999px;border:2px solid transparent;cursor:pointer;transition:transform .15s ease;}
+  .btn:hover{transform:translateY(-1px);}
+  .btn-primary{background:var(--orange);color:var(--navy-deep);}
+  .btn-primary:hover{background:var(--orange-deep);}
+  .btn-ghost{background:transparent;color:var(--navy);border-color:var(--border);}
+  .btn-ghost:hover{border-color:var(--navy);}
+  .btn-navy{background:var(--navy);color:#fff;}
+  .btn-navy:hover{background:var(--navy-deep);}
+  .btn-danger{background:#FBEAE8;color:var(--danger);}
+  .btn-danger:hover{background:#F6D5D1;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+  input,textarea,select{font-family:var(--font-sans);font-size:1rem;width:100%;}
+  .field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;text-align:left;}
+  .field label{font-size:.85rem;font-weight:600;color:var(--navy-deep);}
+  .field input,.field textarea{padding:13px 16px;border-radius:10px;border:1px solid var(--border);background:#fff;}
+  .field textarea{resize:vertical;min-height:90px;}
+  .form-msg{font-size:.88rem;min-height:1.2em;margin-top:6px;}
+  .form-msg.ok{color:var(--success);}
+  .form-msg.err{color:var(--danger);}
+  .card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-m);padding:22px;}
+
+  /* ---- Toast notifications (status log, visible to the user) ---- */
+  #toastStack{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:999;display:flex;flex-direction:column;gap:8px;width:calc(100% - 32px);max-width:380px;align-items:center;}
+  .toast{background:var(--navy-deep);color:#fff;padding:13px 18px;border-radius:12px;font-size:.88rem;box-shadow:0 8px 24px rgba(0,0,0,.18);opacity:0;transform:translateY(10px);transition:opacity .25s ease,transform .25s ease;width:100%;text-align:center;}
+  .toast.show{opacity:1;transform:translateY(0);}
+  .toast.ok{background:var(--success);}
+  .toast.err{background:var(--danger);}
+
+  /* ---- Header / Nav (public) ---- */
+  header.site-header{position:sticky;top:0;z-index:200;background:rgba(247,248,251,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);}
+  .nav-row{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;max-width:var(--max-w);margin:0 auto;gap:12px;}
+  .brand{display:flex;align-items:center;gap:9px;min-width:0;}
+  .brand svg{width:34px;height:34px;display:block;flex-shrink:0;}
+  .brand-text{font-family:var(--font-serif);font-weight:700;font-size:1.15rem;color:var(--navy-deep);white-space:nowrap;}
+  .brand-text span{color:var(--orange-deep);}
+  nav.main-links{display:flex;align-items:center;gap:24px;}
+  nav.main-links a{font-size:.94rem;font-weight:500;color:var(--ink-soft);padding:6px 2px;border-bottom:2px solid transparent;white-space:nowrap;}
+  nav.main-links a:hover,nav.main-links a.active{color:var(--navy-deep);border-color:var(--orange);}
+  .nav-actions{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .nav-account-link{font-size:.88rem;font-weight:600;color:var(--navy);border:1px solid var(--border);padding:9px 15px;border-radius:999px;white-space:nowrap;}
+  .nav-account-link:hover{border-color:var(--navy);}
+  .hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px;}
+  .hamburger span{width:22px;height:2px;background:var(--navy-deep);display:block;}
+
+  @media (max-width:900px){
+    nav.main-links{position:fixed;inset:60px 0 auto 0;background:var(--white);flex-direction:column;align-items:flex-start;gap:0;padding:8px 20px 18px;border-bottom:1px solid var(--border);transform:translateY(-120%);transition:transform .25s ease;max-height:80vh;overflow-y:auto;}
+    nav.main-links.open{transform:translateY(0);}
+    nav.main-links a{width:100%;padding:13px 0;border-bottom:1px solid var(--border);}
+    .hamburger{display:flex;}
+    .brand-text{font-size:1.05rem;}
+  }
+  @media (max-width:420px){
+    .nav-account-link{font-size:.8rem;padding:8px 12px;}
+  }
+
+  /* ---- Member header (distinct nav for logged-in area) ---- */
+  header.member-header{position:sticky;top:0;z-index:200;background:var(--navy);border-bottom:1px solid rgba(255,255,255,.1);}
+  .member-nav-row{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;max-width:var(--max-w);margin:0 auto;gap:12px;}
+  .member-brand{display:flex;align-items:center;gap:8px;color:#fff;}
+  .member-brand svg{width:30px;height:30px;}
+  .member-brand span{font-family:var(--font-serif);font-weight:700;font-size:1.05rem;}
+  nav.member-links{display:flex;align-items:center;gap:20px;}
+  nav.member-links a{font-size:.88rem;font-weight:500;color:#B9C2E0;white-space:nowrap;padding:6px 2px;border-bottom:2px solid transparent;}
+  nav.member-links a:hover,nav.member-links a.active{color:#fff;border-color:var(--orange);}
+  .member-hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px;}
+  .member-hamburger span{width:22px;height:2px;background:#fff;display:block;}
+  @media (max-width:1000px){
+    nav.member-links{position:fixed;inset:58px 0 auto 0;background:var(--navy-deep);flex-direction:column;align-items:flex-start;gap:0;padding:8px 20px 18px;transform:translateY(-120%);transition:transform .25s ease;max-height:80vh;overflow-y:auto;z-index:150;}
+    nav.member-links.open{transform:translateY(0);}
+    nav.member-links a{width:100%;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.08);}
+    .member-hamburger{display:flex;}
+  }
+
+  /* ---- Page header block ---- */
+  .page-hero{padding:48px 0 16px;}
+  .page-hero h1{font-size:clamp(1.7rem,5vw,2.6rem);}
+  .page-hero p.lede{font-size:1.02rem;max-width:60ch;}
+
+  /* ---- Footer ---- */
+  footer{background:var(--navy-deep);color:#C9D1EC;padding:52px 0 28px;margin-top:32px;}
+  .footer-grid{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:32px;margin-bottom:40px;}
+  .footer-brand .brand-text{color:#fff;}
+  .footer-brand p{color:#9AA5CC;font-size:.88rem;max-width:32ch;margin-top:14px;}
+  footer h4{color:#fff;font-size:.9rem;margin-bottom:14px;font-weight:600;}
+  footer ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px;}
+  footer ul a{color:#B0B9DC;font-size:.88rem;}
+  footer ul a:hover{color:#fff;}
+  .socials{display:flex;gap:10px;margin-top:4px;}
+  .socials a{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;}
+  .socials a:hover{background:var(--orange);}
+  .socials svg{width:16px;height:16px;}
+  .footer-bottom{border-top:1px solid rgba(255,255,255,.1);padding-top:22px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:.8rem;color:#8892B8;}
+  @media (max-width:900px){ .footer-grid{grid-template-columns:1fr 1fr;} }
+  @media (max-width:560px){ .footer-grid{grid-template-columns:1fr;text-align:left;} }
+
+  /* ---- Generic responsive table -> stacked cards on mobile ---- */
+  .resp-table{width:100%;border-collapse:collapse;font-size:.88rem;}
+  .resp-table th{text-align:left;color:var(--ink-faint);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--border);font-size:.75rem;text-transform:uppercase;letter-spacing:.03em;}
+  .resp-table td{padding:10px;border-bottom:1px solid #F0F1F6;vertical-align:top;}
+  @media (max-width:700px){
+    .resp-table thead{display:none;}
+    .resp-table, .resp-table tbody, .resp-table tr, .resp-table td{display:block;width:100%;}
+    .resp-table tr{border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:12px;}
+    .resp-table td{border:none;padding:6px 0;}
+    .resp-table td[data-label]::before{content:attr(data-label);display:block;font-size:.72rem;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.03em;}
+  }
+
+
+  .tasks-wrap{max-width:700px;margin:0 auto;padding:36px 20px 60px;}
+  .task-row{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;}
+  .task-reward{font-size:.8rem;color:var(--orange-deep);font-weight:700;}
+
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<header class="member-header">
+  <div class="member-nav-row">
+    <a href="dashboard.html" class="member-brand" aria-label="BLL dashboard">
+      <svg viewBox="0 0 1240 1240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="10" y="10" width="1220" height="1220" rx="220" ry="220" fill="#1B2A5B"/>
+        <path d="M 330 330 L 330 910 L 640 910 Q 800 910 800 770 Q 800 660 700 630 Q 780 600 780 500 Q 780 330 610 330 Z M 470 460 L 590 460 Q 650 460 650 520 Q 650 580 590 580 L 470 580 Z M 470 700 L 620 700 Q 680 700 680 760 Q 680 820 620 820 L 470 820 Z" fill="#FFFFFF" fill-rule="evenodd"/>
+        <g transform="translate(845,345)">
+          <rect x="-20" y="-95" width="40" height="55" rx="8" fill="#F5A623"/>
+          <rect x="-34" y="-110" width="68" height="22" rx="8" fill="#F5A623"/>
+          <path d="M -20 -42 L -20 -30 L -62 55 Q -72 82 -44 82 L 44 82 Q 72 82 62 55 L 20 -30 L 20 -42 Z" fill="#F5A623"/>
+          <circle cx="0" cy="35" r="12" fill="#1B2A5B" opacity="0.35"/>
+        </g>
+      </svg>
+      <span>BLL Member</span>
+    </a>
+    <nav class="member-links" id="memberNav">
+      <a href="dashboard.html" class="">Home</a>
+      <a href="my-courses.html" class="">My Courses</a>
+      <a href="lab-notes.html" class="">Updates</a>
+      <a href="community.html" class="">Community</a>
+      <a href="wallet.html" class="">Wallet</a>
+      <a href="tasks.html" class="active">Tasks</a>
+      <a href="marketplace.html" class="">Marketplace</a>
+      <a href="profile.html" class="">Profile</a>
+      <a href="#" id="memberLogoutLink" style="color:#F5A623;font-weight:700;">Log Out</a>
+    </nav>
+    <button class="member-hamburger" id="memberHamburgerBtn" aria-label="Toggle menu" aria-expanded="false" aria-controls="memberNav">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main id="main">
+
+<div class="tasks-wrap">
+  <h1 style="font-size:1.5rem;">Tasks</h1>
+  <p style="font-size:.92rem;">Simple tasks that earn you wallet credit. New ones get added regularly.</p>
+
+  <div id="tasksList" style="margin-top:24px;">
+    <p style="font-size:.9rem;color:var(--ink-faint);">Loading tasks...</p>
+  </div>
+</div>
+
+</main>
+<div id="toastStack" aria-live="polite"></div>
+<script type="module" src="firebase-init.js"></script>
+<script>
+
+  document.getElementById('year') && (document.getElementById('year').textContent = new Date().getFullYear());
+  const memberHamburgerBtn = document.getElementById('memberHamburgerBtn');
+  const memberNav = document.getElementById('memberNav');
+  if (memberHamburgerBtn && memberNav){
+    memberHamburgerBtn.addEventListener('click', () => {
+      const isOpen = memberNav.classList.toggle('open');
+      memberHamburgerBtn.setAttribute('aria-expanded', isOpen);
+    });
+  }
+  function wireLogout(){
+    if (!(window.BLL && window.BLL.logOut)) { setTimeout(wireLogout, 300); return; }
+    const link = document.getElementById('memberLogoutLink');
+    if (link){
+      link.addEventListener('click', async (e) => {
+        e.preventDefault();
+        await window.BLL.logOut();
+        window.location.href = 'index.html';
+      });
+    }
+  }
+  wireLogout();
+
+  // Guard: bounce to login.html if nobody is signed in
+  function requireAuth(){
+    if (!(window.BLL && window.BLL.onAuthChange)) { setTimeout(requireAuth, 300); return; }
+    window.BLL.onAuthChange((user) => {
+      if (!user){ window.location.href = 'login.html'; }
+      else if (window.onMemberAuthReady) { window.onMemberAuthReady(user); }
+    });
+  }
+  requireAuth();
+
+
+  function bllToast(message, type){
+    const stack = document.getElementById('toastStack');
+    if (!stack) return;
+    const el = document.createElement('div');
+    el.className = 'toast' + (type ? ' ' + type : '');
+    el.textContent = message;
+    stack.appendChild(el);
+    requestAnimationFrame(() => el.classList.add('show'));
+    setTimeout(() => {
+      el.classList.remove('show');
+      setTimeout(() => el.remove(), 300);
+    }, 3200);
+  }
+  window.bllToast = bllToast;
+
+
+  window.onMemberAuthReady = async function(user){
+    const [tasks, completed] = await Promise.all([
+      window.BLL.getTasks(),
+      window.BLL.getMyCompletedTasks(user.uid)
+    ]);
+
+    const list = document.getElementById('tasksList');
+    if (!tasks.length){
+      list.innerHTML = '<p style="font-size:.9rem;color:var(--ink-faint);">No tasks available right now — check back soon.</p>';
+      return;
+    }
+
+    list.innerHTML = tasks.map(t => {
+      const done = completed.includes(t.id);
+      return `
+        <div class="task-row">
+          <div>
+            <strong style="font-size:.95rem;">${t.title || 'Task'}</strong>
+            <div class="task-reward">+₦${t.reward || 0}</div>
+          </div>
+          <button class="btn ${done ? 'btn-ghost' : 'btn-primary'}" data-id="${t.id}" data-reward="${t.reward || 0}" ${done ? 'disabled' : ''}>
+            ${done ? 'Completed' : 'Mark Done'}
+          </button>
+        </div>
+      `;
+    }).join('');
+
+    list.querySelectorAll('button[data-id]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        btn.textContent = '...';
+        await window.BLL.completeTask(user.uid, btn.dataset.id, btn.dataset.reward);
+        window.bllToast('Task complete! Reward added to your wallet.', 'ok');
+        btn.textContent = 'Completed';
+      });
+    });
+  };
+
+</script>
+</body>
+</html>
